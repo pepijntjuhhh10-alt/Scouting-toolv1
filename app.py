@@ -524,7 +524,7 @@ def scrape_fbref_player(url):
         time.sleep(2)
         r = requests.get(url, headers=HEADERS, timeout=20)
         if r.status_code != 200:
-            return {}, f"FBref gaf statuscode {r.status_code} terug."
+            return {}, f"FBref gaf statuscode {r.status_code} terug. Dit betekent meestal dat FBref Streamlit Cloud blokkeert. De app blijft werken: vul de velden handmatig in of gebruik later een andere link."
 
         html = r.text.replace("<!--", "").replace("-->", "")
         tables = pd.read_html(html)
@@ -692,8 +692,8 @@ def color(score):
 # SESSION STATE
 # =========================================================
 
-if "values" not in st.session_state:
-    st.session_state.values = DEFAULT_VALUES.copy()
+if "player_values" not in st.session_state:
+    st.session_state["player_values"] = DEFAULT_VALUES.copy()
 
 # =========================================================
 # SIDEBAR
@@ -720,13 +720,13 @@ with col_b:
     reset_clicked = st.button("Reset data")
 
 if reset_clicked:
-    st.session_state.values = DEFAULT_VALUES.copy()
+    st.session_state["player_values"] = DEFAULT_VALUES.copy()
     st.success("Data gereset naar standaardwaarden.")
 
 if import_clicked:
     scraped, message = scrape_fbref_player(fbref_url)
     if scraped:
-        st.session_state.values.update(scraped)
+        st.session_state["player_values"].update(scraped)
         st.success(message)
     else:
         st.warning(message)
@@ -744,7 +744,7 @@ tab_attack, tab_pass, tab_carry, tab_def, tab_duel, tab_extra = st.tabs(
     ["Aanval", "Passing", "Carries & dribbels", "Verdedigen", "Duels", "Ratings/extra"]
 )
 
-values = st.session_state.values
+values = st.session_state["player_values"]
 
 def number_metric(metric, label_text=None, help_text=None):
     if label_text is None:
